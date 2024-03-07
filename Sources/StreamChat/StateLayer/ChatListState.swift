@@ -12,7 +12,7 @@ public final class ChatListState: ObservableObject {
     let query: ChannelListQuery
     
     init(channels: [ChatChannel], query: ChannelListQuery, clientConfig: ChatClientConfig, database: DatabaseContainer) {
-        self.channels = channels
+        self.channels = channels.sort(using: query.sortValues)
         self.clientConfig = clientConfig
         hasLoadedAllChannels = channels.count < query.pagination.pageSize
         observer = Observer(query: query, chatClientConfig: clientConfig, database: database)
@@ -22,7 +22,7 @@ public final class ChatListState: ObservableObject {
             with: .init(channelsDidChange: { [weak self] changes in
                 guard let self else { return }
                 let channels = await value(forKeyPath: \.channels)
-                await self.setValue(channels.uniquelyApplied(changes, sorting: query.sort), for: \.channels)
+                await self.setValue(channels.uniquelyApplied(changes, sortValues: query.sortValues), for: \.channels)
             })
         )
     }

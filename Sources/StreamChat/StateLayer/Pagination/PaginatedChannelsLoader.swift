@@ -20,17 +20,18 @@ struct PaginatedChannelsLoader {
             query: query,
             config: chatClientConfig
         )
+        .sort(using: query.sortValues)
         let currentChannels = await state.value(forKeyPath: \.channels)
-        let merged = currentChannels.uniquelyMerged(newSortedChannels, sorting: query.sort)
+        let merged = currentChannels.uniquelyMerged(newSortedChannels, sortValues: query.sortValues)
         await state.setSortedChannels(merged, hasLoadedAll: payloadChannels.count < pagination.pageSize)
         
         return payloadChannels
     }
     
     func loadMoreChannels(to state: ChatListState, limit: Int? = nil) async throws -> [ChatChannel] {
-        let cursor = await state.value(forKeyPath: \.channels).last?.cid.rawValue
+        let count = await state.value(forKeyPath: \.channels).count
         let pageSize = limit ?? query.pagination.pageSize
-        let pagination = Pagination(pageSize: pageSize > 0 ? pageSize : .channelsPageSize, cursor: cursor)
+        let pagination = Pagination(pageSize: pageSize > 0 ? pageSize : .channelsPageSize, offset: count)
         return try await loadChannels(to: state, pagination: pagination)
     }
 }

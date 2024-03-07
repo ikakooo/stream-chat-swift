@@ -144,3 +144,15 @@ extension Array where Element == SortValue<ChatChannel> {
         return result
     }
 }
+
+extension ChannelListQuery {
+    /// Returns sort values for the query (if not sorting is set, default sorting values are used).
+    var sortValues: [SortValue<ChatChannel>] {
+        let keys = sort.isEmpty ? [Sorting(key: ChannelListSortingKey.default)] : sort
+        var values = keys.compactMap(\.sortValue)
+//        return Array(values.dropFirst())
+        return values
+        // TODO: revert
+        return [values.last!]
+    }
+}
