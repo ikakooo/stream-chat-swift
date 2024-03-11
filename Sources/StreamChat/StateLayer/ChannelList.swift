@@ -12,20 +12,28 @@ public struct ChannelList {
     
     private let channelListUpdater: ChannelListUpdater
     
-    init(channels: [ChatChannel], query: ChannelListQuery, dynamicFilter: ((ChatChannel) -> Bool)?, channelListUpdater: ChannelListUpdater, client: ChatClient, environment: Environment = .init()) {
+    init(
+        channels: [ChatChannel],
+        query: ChannelListQuery,
+        dynamicFilter: ((ChatChannel) -> Bool)?,
+        channelListUpdater: ChannelListUpdater,
+        client: ChatClient,
+        environment: Environment = .init()
+    ) {
         self.channelListUpdater = channelListUpdater
         self.query = query
-        let state = environment.stateBuilder(
+        state = environment.stateBuilder(
             channels,
             query,
+            dynamicFilter,
             client.config,
-            client.databaseContainer
+            channelListUpdater,
+            client.databaseContainer,
+            client.eventNotificationCenter
         )
-        self.state = state
         
         // These are currently not implemented compared to ChannelListController:
         #warning("Implement query reset (e.g. SyncRepository)")
-        #warning("Implement linking and unlinking based on EventController callbacks")
     }
     
     /// An observable object representing the current state of the channel list.
@@ -65,8 +73,11 @@ extension ChannelList {
         var stateBuilder: (
             _ channels: [ChatChannel],
             _ query: ChannelListQuery,
+            _ dynamicFilter: ((ChatChannel) -> Bool)?,
             _ clientConfig: ChatClientConfig,
-            _ database: DatabaseContainer
+            _ channelListUpdater: ChannelListUpdater,
+            _ database: DatabaseContainer,
+            _ eventNotificationCenter: EventNotificationCenter
         ) -> ChannelListState = ChannelListState.init
     }
 }
