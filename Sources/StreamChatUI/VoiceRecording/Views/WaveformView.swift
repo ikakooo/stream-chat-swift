@@ -41,7 +41,7 @@ open class WaveformView: _View, ThemeProvider {
         }
     }
 
-    var content: Content = .initial {
+    open var content: Content = .initial {
         didSet { updateContentIfNeeded() }
     }
 
